@@ -35,7 +35,9 @@ import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStreamReader;
 
+import java.util.ArrayList;
 import java.util.Iterator;
+import java.util.List;
 
 
 public class ExcelActivity extends Activity {
@@ -43,6 +45,7 @@ public class ExcelActivity extends Activity {
     Intent intent ;
     Button btnExplore;
     String PathHolder;
+    List<String> phoneNumbers = new ArrayList<>();
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -55,17 +58,12 @@ public class ExcelActivity extends Activity {
                 intent = new Intent(Intent.ACTION_GET_CONTENT);
                 intent.setType("*/*");
                 startActivityForResult(intent, 7);
-//                String data = getTextFileData("dimens.txt");
-//                Toast.makeText(ExcelActivity.this, "Data Is:"+data, Toast.LENGTH_SHORT).show();
-                //readFile(getApplicationContext(),"dimens.txt");
+
 
             }
         });
 
-        //readFile(getApplicationContext(),"Book.xlsx");
-        //txtFileRead();
-       // readViewExcel();
-       // createReadXlsx();
+
 
     }
     @Override
@@ -78,29 +76,31 @@ public class ExcelActivity extends Activity {
 
                 if(resultCode==RESULT_OK){
 
-                    //String PathHolder = data.getData().getLastPathSegment();
                     Uri uri = data.getData();
-
-                   // String PathHolder =uri.getPath();
                     PathHolder =getPath(getApplicationContext(),uri);
-
-                    //Toast.makeText(ExcelActivity.this, PathHolder , Toast.LENGTH_LONG).show();
                     Log.e("Path:",PathHolder);
-                    //read_file(getApplicationContext(),PathHolder);
-                    //readExcelFile(getApplicationContext(),PathHolder);
-
-                    try {
-                        readXLSXFile();
-                    } catch (IOException e) {
-                        e.printStackTrace();
+                    if(PathHolder.contains(".xlsx")){
+                        try {
+                            readXLSXFile();
+                        } catch (IOException e) {
+                            e.printStackTrace();
+                        }
+                    }else if(PathHolder.contains(".xls")){
+                        readExcelFile(getApplicationContext(),PathHolder);
+                    }else if(PathHolder.contains(".txt")){
+                        readTxtfile(getApplicationContext(),PathHolder);
+                    }else {
+                        Toast.makeText(this, "Invalid file", Toast.LENGTH_SHORT).show();
                     }
+
                 }
                 break;
 
         }
     }
 
-    private void  read_file(Context context, String filename) {
+    private void  readTxtfile(Context context, String filename) {
+        phoneNumbers.clear();
         try {
             // Open stream to read file.
             FileInputStream in = new FileInputStream(filename);
@@ -111,34 +111,19 @@ public class ExcelActivity extends Activity {
             String s= null;
             while((s= br.readLine())!= null)  {
                 sb.append(s).append("\n");
+                phoneNumbers.add(s);
             }
-            Toast.makeText(context, ""+sb.toString(), Toast.LENGTH_SHORT).show();
+            Toast.makeText(context, ""+phoneNumbers.get(3).toString(), Toast.LENGTH_SHORT).show();
 
         } catch (Exception e) {
             Toast.makeText(this,"Error:"+ e.getMessage(),Toast.LENGTH_SHORT).show();
         }
     }
 
-    private static final int REQUEST_WRITE_PERMISSION = 786;
-
-    @Override
-    public void onRequestPermissionsResult(int requestCode, String[] permissions, int[] grantResults) {
-        if (requestCode == REQUEST_WRITE_PERMISSION && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
-            //openFilePicker();
-        }
-    }
-    private void requestPermission() {
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-            requestPermissions(new String[]{android.Manifest.permission.WRITE_EXTERNAL_STORAGE}, REQUEST_WRITE_PERMISSION);
-        } else {
-            //openFilePicker();
-        }
-    }
-
 
     private void readXLSXFile() throws IOException
     {
-        //InputStream ExcelFileToRead = new FileInputStream("C:/Test.xlsx");
+        phoneNumbers.clear();
         FileInputStream ExcelFileToRead = new FileInputStream(PathHolder);
         XSSFWorkbook wb = new XSSFWorkbook(ExcelFileToRead);
 
@@ -161,24 +146,32 @@ public class ExcelActivity extends Activity {
                 if (cell.getCellType() == XSSFCell.CELL_TYPE_STRING)
                 {
                     System.out.print(cell.getStringCellValue()+" ");
+
+                    Toast.makeText(this, cell.getStringCellValue()+" ", Toast.LENGTH_SHORT).show();
                 }
                 else if(cell.getCellType() == XSSFCell.CELL_TYPE_NUMERIC)
                 {
                     System.out.print(cell.getNumericCellValue()+" ");
+                    Toast.makeText(this, cell.getNumericCellValue()+" ", Toast.LENGTH_SHORT).show();
+                    phoneNumbers.add(cell.getNumericCellValue()+" ");
                 }
+
+
                 else
                 {
                     //U Can Handel Boolean, Formula, Errors
                 }
             }
-            System.out.println();
+
         }
+        Toast.makeText(getApplicationContext(), ""+phoneNumbers.get(3).toString(), Toast.LENGTH_SHORT).show();
 
     }
 
 
 
     private  void readExcelFile(Context context, String filename) {
+        phoneNumbers.clear();
         try{
             // Creating Input Stream
             //File file = new File(context.getExternalFilesDir(null), filename);
@@ -201,13 +194,42 @@ public class ExcelActivity extends Activity {
                 Iterator cellIter = myRow.cellIterator();
                 while(cellIter.hasNext()){
                     HSSFCell myCell = (HSSFCell) cellIter.next();
-                    Log.d("", "Cell Value: " +  myCell.toString());
+                    phoneNumbers.add(myCell.toString());
                     Toast.makeText(context, "cell Value: " + myCell.toString(), Toast.LENGTH_SHORT).show();
                 }
+
+
             }
+
+            Toast.makeText(context, ""+phoneNumbers.get(3).toString(), Toast.LENGTH_SHORT).show();
+
         }catch (Exception e){e.printStackTrace(); }
 
     }
+
+
+    private static final int REQUEST_WRITE_PERMISSION = 786;
+
+    @Override
+    public void onRequestPermissionsResult(int requestCode, String[] permissions, int[] grantResults) {
+        if (requestCode == REQUEST_WRITE_PERMISSION && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+            //openFilePicker();
+        }
+    }
+    private void requestPermission() {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+            requestPermissions(new String[]{android.Manifest.permission.WRITE_EXTERNAL_STORAGE}, REQUEST_WRITE_PERMISSION);
+        } else {
+            //openFilePicker();
+        }
+    }
+
+
+
+
+
+
+
 
 
 

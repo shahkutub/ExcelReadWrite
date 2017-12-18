@@ -92,7 +92,7 @@ public class MainActivity extends AppCompatActivity {
         //Cell style for header row
         CellStyle cs = wb.createCellStyle();
         cs.setFillForegroundColor(HSSFColor.LIME.index);
-        cs.setFillPattern(HSSFCellStyle.SOLID_FOREGROUND);
+        //cs.setFillPattern(HSSFCellStyle.class);
 
         //New Sheet
         Sheet sheet1 = null;
